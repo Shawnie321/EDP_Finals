@@ -70,9 +70,9 @@ class TodoApp:
         self.tree.pack(fill="both", expand=True, padx=8, pady=8)
 
         # Row tags for styling
-        self.tree.tag_configure("overdue", background="#ffcccc")
-        self.tree.tag_configure("urgent", background="#fff2cc")
-        self.tree.tag_configure("completed", background="#ccffcc")
+        self.tree.tag_configure("overdue", background="#ffa0a0")
+        self.tree.tag_configure("urgent", background="#ffca97")
+        self.tree.tag_configure("completed", background="#a8ffac")
         self.tree.tag_configure("normal", background="")
 
         # Bind double-click to quick snooze (example)
