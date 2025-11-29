@@ -202,22 +202,4 @@ class DatabaseManager:
     # Utility: helpful but non-destructive
     # ----------------------
     def create_table_in_supabase(self):
-        """
-        Creating tables is a privileged operation typically done via Supabase SQL Editor
-        or migrations. This method intentionally does not execute DDL to avoid
-        unexpected privileges. Use the SQL editor or a migration script to create:
-
-        CREATE TABLE tasks (
-            id SERIAL PRIMARY KEY,
-            title TEXT,
-            due_date DATE,
-            priority VARCHAR(50),
-            status VARCHAR(50),
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-
-        If you want, I can generate a migration script or a direct SQL call here —
-        but that requires elevated DB permissions and is safer to run from your
-        Supabase SQL Editor.
-        """
         raise NotImplementedError("Use Supabase SQL Editor or provide permission to run DDL.")

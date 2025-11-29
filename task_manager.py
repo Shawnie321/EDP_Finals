@@ -7,8 +7,8 @@ from datetime import datetime, date, timedelta
 from database_manager import DatabaseManager
 
 TASKS_JSON = "tasks.json"
-PRIORITY_LEVELS = ("Low", "Normal", "High", "Critical")
-PRIORITY_WEIGHT = {"Low": 1, "Normal": 2, "High": 3, "Critical": 4}
+PRIORITY_LEVELS = ("Low", "Normal", "High")
+PRIORITY_WEIGHT = {"Low": 1, "Normal": 2, "High": 3}
 
 
 def _now_iso() -> str:
