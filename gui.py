@@ -12,57 +12,245 @@ class TodoApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Smart To-Do - Analytics")
+        # give a modern default size
+        try:
+            self.root.geometry("1000x640")
+        except Exception:
+            pass
         self.tm = TaskManager()
         self.sort_column = None
         self.sort_reverse = False
+        self.current_theme = "light"  # default theme
+        self.style = ttk.Style(self.root)
+        # prefer a theme that respects custom heading colors on most platforms
+        try:
+            self.style.theme_use("clam")
+        except Exception:
+            pass
+        self._init_styles()
         self._build_ui()
+        self._apply_theme(self.current_theme)
+        self.refresh_list()
+
+    def _init_styles(self):
+        """Initialize ttk styles for a modern light/dark look."""
+        # Base font
+        default_font = ("Segoe UI", 10)
+        bold_font = ("Segoe UI Semibold", 10)
+        heading_font = ("Segoe UI Semibold", 11)
+
+        self.style.configure("Modern.TFrame", background="#f3f3f3")
+        self.style.configure("Sidebar.TFrame", background="#ffffff")
+        self.style.configure("Header.TLabel", font=heading_font, background="#f3f3f3")
+        self.style.configure("SubHeader.TLabel", font=bold_font, background="#ffffff")
+        self.style.configure("Modern.TLabel", font=default_font, background="#f3f3f3")
+        self.style.configure("Modern.TEntry", font=default_font)
+        self.style.configure("Accent.TButton", foreground="#ffffff", background="#0078D7", font=bold_font)
+        self.style.map("Accent.TButton", background=[("active", "#106ebe")])
+        # Toggle button style (explicit black text as requested)
+        self.style.configure("Toggle.TButton", foreground="#000000", background="#e6e6e6", font=bold_font)
+        self.style.map("Toggle.TButton", background=[("active", "#d4d4d4")])
+        # Icon button style (small, flat)
+        self.style.configure("Icon.TButton", foreground="#000000", background="#e6e6e6", font=("Segoe UI Semibold", 9), padding=4)
+        self.style.map("Icon.TButton", background=[("active", "#d4d4d4")])
+
+        # Treeview styling (headings & rows)
+        self.style.configure("Modern.Treeview", font=default_font, rowheight=28, background="#ffffff", fieldbackground="#ffffff")
+        self.style.configure("Modern.Treeview.Heading", font=bold_font)
+        try:
+            self.style.layout("Treeheading.Cell", self.style.layout("Treeheading.Cell"))
+        except Exception:
+            pass
+
+    def _apply_theme(self, mode: str):
+        """Apply colors for 'light' or 'dark' theme."""
+        if mode == "dark":
+            root_bg = "#1e1e1e"
+            sidebar_bg = "#252526"
+            panel_bg = "#2d2d30"
+            fg = "#ffffff"
+            heading_bg = "#2b2b2b"
+            tree_bg = "#252526"
+            row_bg = "#2d2d30"
+            selection_bg = "#0078D7"
+        else:
+            # light
+            root_bg = "#f3f3f3"
+            sidebar_bg = "#ffffff"
+            panel_bg = "#ffffff"
+            fg = "#000000"
+            heading_bg = "#f3f3f3"
+            tree_bg = "#ffffff"
+            row_bg = "#ffffff"
+            selection_bg = "#0078D7"
+
+        self.style.configure("Modern.TFrame", background=root_bg)
+        self.style.configure("Sidebar.TFrame", background=sidebar_bg)
+        self.style.configure("Modern.TLabel", background=root_bg, foreground=fg)
+        self.style.configure("Header.TLabel", background=root_bg, foreground=fg)
+        self.style.configure("SubHeader.TLabel", background=sidebar_bg, foreground=fg)
+        self.style.configure("Modern.TEntry", fieldbackground=panel_bg, background=panel_bg, foreground=fg)
+        self.style.configure("Accent.TButton", background=selection_bg, foreground="#ffffff")
+        # ensure toggle button text color is black as requested
+        try:
+            self.style.configure("Toggle.TButton", foreground="#000000")
+        except Exception:
+            pass
+
+        # Treeview colors
+        self.style.configure("Modern.Treeview", background=tree_bg, fieldbackground=tree_bg, foreground=fg)
+        self.style.configure("Modern.Treeview.Heading", background=heading_bg, foreground=fg)
+        # tag colors for rows - keep clear contrasts
+        if mode == "dark":
+            self.tree_tag_colors = {"overdue": "#5a1515", "due_soon": "#5a4300", "completed": "#155a2a", "urgent": "#5a2b00", "normal": row_bg}
+        else:
+            self.tree_tag_colors = {"overdue": "#ffcccc", "due_soon": "#fff2cc", "completed": "#ccffcc", "urgent": "#ffe6cc", "normal": row_bg}
+
+        try:
+            self.root.configure(bg=root_bg)
+        except Exception:
+            pass
+
+        # if tree exists, reconfigure its tags
+        if hasattr(self, "tree"):
+            for tag, color in self.tree_tag_colors.items():
+                try:
+                    self.tree.tag_configure(tag, background=color)
+                except Exception:
+                    pass
+        # update notes text widget colors to match theme
+        try:
+            if hasattr(self, "entry_notes"):
+                self.entry_notes.config(bg=panel_bg, fg=fg, insertbackground=fg)
+                # ensure left pane does not allow widgets to overflow
+                try:
+                    left.update_idletasks()
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    def _toggle_theme(self):
+        self.current_theme = "dark" if self.current_theme == "light" else "light"
+        self._apply_theme(self.current_theme)
+        # update the icon to reflect the action (show moon when in light mode to switch to dark)
+        try:
+            if hasattr(self, "theme_icon_btn"):
+                self.theme_icon_btn.config(text=("🌙" if self.current_theme == "light" else "☀️"))
+        except Exception:
+            pass
         self.refresh_list()
 
     def _build_ui(self):
-        frm_inputs = ttk.Frame(self.root, padding=8)
-        frm_inputs.pack(fill="x")
+        # Main container
+        container = ttk.Frame(self.root, style="Modern.TFrame", padding=8)
+        container.pack(fill="both", expand=True)
 
-        ttk.Label(frm_inputs, text="Task:").grid(row=0, column=0, sticky="w")
-        self.entry_title = ttk.Entry(frm_inputs, width=40)
-        self.entry_title.grid(row=0, column=1, sticky="w", padx=(4, 0))
+        # Use a PanedWindow to separate left and right panes so widgets cannot overlap
+        paned = ttk.Panedwindow(container, orient=tk.HORIZONTAL)
+        paned.pack(fill="both", expand=True)
 
-        ttk.Label(frm_inputs, text="Due (YYYY-MM-DD):").grid(row=1, column=0, sticky="w")
-        frm_due = ttk.Frame(frm_inputs)
-        frm_due.grid(row=1, column=1, sticky="w", padx=(4, 0))
-        self.entry_due = ttk.Entry(frm_due, width=15)
-        self.entry_due.pack(side="left", padx=(0, 4))
-        ttk.Button(frm_due, text="📅 Pick", command=self.on_pick_due_date).pack(side="left")
+        # Left sidebar for inputs and actions (fixed minsize)
+        left = ttk.Frame(paned, style="Sidebar.TFrame", width=320)
+        left.pack_propagate(False)
+        paned.add(left, weight=0)
 
-        ttk.Label(frm_inputs, text="Priority:").grid(row=2, column=0, sticky="w")
-        self.entry_priority = ttk.Combobox(frm_inputs, values=list(PRIORITY_LEVELS), width=18)
+        # Right content area will be a pane so it always sits beside left
+        right = ttk.Frame(paned, style="Modern.TFrame")
+        paned.add(right, weight=1)
+
+        # Header and theme toggle (kept at top of container)
+        header_frame = ttk.Frame(container, style="Modern.TFrame")
+        header_frame.place(relx=0.5, rely=0.01, anchor="n")
+
+        ttk.Label(left, text="Smart To-Do List", style="Header.TLabel", anchor="w").pack(fill="x", padx=12, pady=(12, 6))
+
+        # Theme icon button placed in upper-right of the root window.
+        # Use a tk.Button for reliable bg/fg rendering across platforms.
+        if self.current_theme == "dark":
+            icon_bg = "#3a3a3a"
+            icon_fg = "#ffffff"
+        else:
+            icon_bg = "#e6e6e6"
+            icon_fg = "#000000"
+        icon_text = ("🌙" if self.current_theme == "light" else "☀️")
+        icon_btn = tk.Button(self.root, text=icon_text, command=self._toggle_theme, bd=0, relief="flat", bg=icon_bg, fg=icon_fg, activebackground=icon_bg, activeforeground=icon_fg)
+        # place near the upper-right corner of the root with a small margin
+        icon_btn.place(relx=1.0, x=-12, y=12, anchor="ne")
+        self.theme_icon_btn = icon_btn
+
+        # Inputs
+        inp_frame = ttk.Frame(left, style="Sidebar.TFrame")
+        inp_frame.pack(fill="both", expand=False, padx=12, pady=(6,0))
+        inp_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(inp_frame, text="Task:", style="SubHeader.TLabel").grid(row=0, column=0, sticky="w")
+        self.entry_title = ttk.Entry(inp_frame, style="Modern.TEntry")
+        self.entry_title.grid(row=0, column=1, sticky="ew", padx=(6, 0), pady=4)
+
+        ttk.Label(inp_frame, text="Due (YYYY-MM-DD):", style="SubHeader.TLabel").grid(row=1, column=0, sticky="w")
+        frm_due = ttk.Frame(inp_frame, style="Sidebar.TFrame")
+        frm_due.grid(row=1, column=1, sticky="w", padx=(6, 0), pady=4)
+        self.entry_due = ttk.Entry(frm_due, width=18, style="Modern.TEntry")
+        self.entry_due.pack(side="left")
+        ttk.Button(frm_due, text="📅", width=3, command=self.on_pick_due_date).pack(side="left", padx=(6, 0))
+
+        ttk.Label(inp_frame, text="Priority:", style="SubHeader.TLabel").grid(row=2, column=0, sticky="w")
+        self.entry_priority = ttk.Combobox(inp_frame, values=list(PRIORITY_LEVELS), width=18)
         self.entry_priority.set("Normal")
-        self.entry_priority.grid(row=2, column=1, sticky="w", padx=(4, 0))
+        self.entry_priority.grid(row=2, column=1, sticky="w", padx=(6, 0), pady=4)
 
-        # Notes input for quick add
-        ttk.Label(frm_inputs, text="Notes:").grid(row=3, column=0, sticky="nw", pady=(6,0))
-        self.entry_notes = tk.Text(frm_inputs, width=50, height=3)
-        self.entry_notes.grid(row=3, column=1, sticky="w", padx=(4,0), pady=(6,0))
-        
-        frm_buttons = ttk.Frame(self.root, padding=6)
-        frm_buttons.pack(fill="x")
-        ttk.Button(frm_buttons, text="Add", command=self.on_add_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Edit", command=self.on_edit_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Complete", command=self.on_complete_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Delete", command=self.on_delete_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Bulk Complete", command=self.on_bulk_complete).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Bulk Delete", command=self.on_bulk_delete).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Snooze", command=self.on_snooze_preset_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Analytics", command=self.on_analytics_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Sync", command=self.on_sync_click).pack(side="left", padx=4)
-        ttk.Button(frm_buttons, text="Refresh", command=self.refresh_list).pack(side="left", padx=4)
+        ttk.Label(inp_frame, text="Notes:", style="SubHeader.TLabel").grid(row=3, column=0, sticky="nw", pady=(6, 0))
+        # add a visible 1px border for the notes box (relief solid) and make it expand within left pane
+        self.entry_notes = tk.Text(inp_frame, height=6, bd=1, relief="solid", highlightthickness=0)
+        self.entry_notes.grid(row=3, column=1, sticky="ew", padx=(6, 0), pady=(6, 0))
 
-        # Treeview with urgency and due-status columns
-        # include notes column (short preview) and keep an accessible cols list
+        # Action buttons grouped
+        btn_frame = ttk.Frame(left, style="Sidebar.TFrame")
+        btn_frame.pack(fill="x", padx=12, pady=(12, 6))
+        ttk.Button(btn_frame, text="Add", command=self.on_add_click, style="Toggle.TButton").pack(fill="x", pady=4)
+        ttk.Button(btn_frame, text="Edit", command=self.on_edit_click).pack(fill="x", pady=4)
+        ttk.Button(btn_frame, text="Complete", command=self.on_complete_click).pack(fill="x", pady=4)
+        ttk.Button(btn_frame, text="Delete", command=self.on_delete_click).pack(fill="x", pady=4)
+        ttk.Button(btn_frame, text="Snooze", command=self.on_snooze_preset_click).pack(fill="x", pady=4)
+        ttk.Button(btn_frame, text="Analytics", command=self.on_analytics_click).pack(fill="x", pady=4)
+        ttk.Button(btn_frame, text="Sync", command=self.on_sync_click).pack(fill="x", pady=4)
+
+        # Right content area: search and tree
+        # Search bar
+        frm_search = ttk.Frame(right, style="Modern.TFrame", padding=8)
+        frm_search.pack(fill="x")
+        ttk.Label(frm_search, text="Search:", style="Modern.TLabel").grid(row=0, column=0, sticky="w")
+        self.entry_search = ttk.Entry(frm_search, width=40, style="Modern.TEntry")
+        self.entry_search.grid(row=0, column=1, sticky="w", padx=(6, 0))
+        self.entry_search.bind("<KeyRelease>", self.refresh_list)
+
+        # Treeview
         self.cols = ("id", "title", "notes", "due_date", "priority", "status", "urgency", "due_status")
         cols = self.cols[:]
-        self.tree = ttk.Treeview(self.root, columns=cols, show="headings", selectmode="extended")
+        # Create a container frame for the tree and its scrollbars
+        tree_container = ttk.Frame(right)
+        tree_container.pack(fill="both", expand=True, padx=12, pady=(6, 12))
+
+        # Horizontal and vertical scrollbars
+        h_scroll = ttk.Scrollbar(tree_container, orient="horizontal")
+        v_scroll = ttk.Scrollbar(tree_container, orient="vertical")
+
+        self.tree = ttk.Treeview(tree_container, columns=cols, show="headings", selectmode="extended", style="Modern.Treeview")
+        # Attach scroll commands
+        self.tree.configure(xscrollcommand=h_scroll.set, yscrollcommand=v_scroll.set)
+        h_scroll.configure(command=self.tree.xview)
+        v_scroll.configure(command=self.tree.yview)
+
+        # Layout with grid so scrollbars align correctly
+        tree_container.grid_rowconfigure(0, weight=1)
+        tree_container.grid_columnconfigure(0, weight=1)
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        v_scroll.grid(row=0, column=1, sticky="ns")
+        h_scroll.grid(row=1, column=0, sticky="ew", columnspan=2)
+
         headings = [
-            ("id", 60), ("title", 280), ("notes", 200), ("due_date", 110),
+            ("id", 60), ("title", 360), ("notes", 260), ("due_date", 110),
             ("priority", 100), ("status", 100), ("urgency", 80), ("due_status", 100)
         ]
         for c, w in headings:
@@ -70,24 +258,17 @@ class TodoApp:
             heading_anchor = "center"
             self.tree.heading(c, text=c.replace("_", " ").title(), anchor=heading_anchor, command=lambda col=c: self.on_column_click(col))
             self.tree.column(c, width=w, anchor=col_anchor)
-        self.tree.pack(fill="both", expand=True, padx=8, pady=8)
+        # note: packed via grid in the tree_container
 
-        # Row tags for styling
+        # Row tags for styling (colors set via _apply_theme)
         self.tree.tag_configure("overdue", background="#ffcccc")
         self.tree.tag_configure("due_soon", background="#fff2cc")
         self.tree.tag_configure("completed", background="#ccffcc")
         self.tree.tag_configure("normal", background="")
+        self.tree.tag_configure("urgent", background="#ffe6cc")
 
         # Bind double-click to quick snooze (example)
         self.tree.bind("<Double-1>", self.on_tree_double_click)
-
-        # Search/filter bar
-        frm_search = ttk.Frame(self.root, padding=8)
-        frm_search.pack(fill="x")
-        ttk.Label(frm_search, text="Search:").grid(row=0, column=0, sticky="w")
-        self.entry_search = ttk.Entry(frm_search, width=40)
-        self.entry_search.grid(row=0, column=1, sticky="w", padx=(4, 0))
-        self.entry_search.bind("<KeyRelease>", self.refresh_list)
 
     def on_column_click(self, column):
         """Sort by clicked column."""
@@ -397,21 +578,47 @@ class TodoApp:
         e_title.focus_set()
 
     def on_complete_click(self):
-        task_id = self._get_selected_task_id()
-        if not task_id:
+        # Support single or multiple selection: if multiple selected, use bulk complete flow
+        task_ids = self._get_selected_task_ids()
+        if not task_ids:
             messagebox.showinfo("Info", "Select a task to mark complete.")
             return
-        self.tm.complete_task(task_id)
+        if len(task_ids) > 1:
+            # reuse existing bulk handler which includes confirmation
+            self.on_bulk_complete()
+            return
+        # single selection
+        try:
+            self.tm.complete_task(task_ids[0])
+        except Exception:
+            try:
+                # fallback for different TaskManager API
+                self.tm.complete_task(int(task_ids[0]))
+            except Exception:
+                pass
         self.refresh_list()
 
     def on_delete_click(self):
-        task_id = self._get_selected_task_id()
-        if not task_id:
+        # Support single or multiple selection: if multiple selected, use bulk delete flow
+        task_ids = self._get_selected_task_ids()
+        if not task_ids:
             messagebox.showinfo("Info", "Select a task to delete.")
             return
-        if not messagebox.askyesno("Confirm", f"Delete task id {task_id}?"):
+        if len(task_ids) > 1:
+            # reuse existing bulk handler which includes confirmation
+            self.on_bulk_delete()
             return
-        self.tm.delete_task(task_id)
+        # single selection
+        tid = task_ids[0]
+        if not messagebox.askyesno("Confirm", f"Delete task id {tid}?"):
+            return
+        try:
+            self.tm.delete_task(tid)
+        except Exception:
+            try:
+                self.tm.delete_task(int(tid))
+            except Exception:
+                pass
         self.refresh_list()
 
     def on_bulk_complete(self):
