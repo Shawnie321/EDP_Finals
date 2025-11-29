@@ -144,10 +144,8 @@ class TodoApp:
                     d = datetime.fromisoformat(t.due_date).date()
                     if status != "Completed" and d < date.today():
                         days_past = (date.today() - d).days
-                        if days_past >= 7:
-                            due_status = "Very Overdue"
-                        else:
-                            due_status = "Overdue"
+                        # treat any past due date as just "Overdue" (no "Very Overdue" distinction)
+                        due_status = "Overdue"      
                     elif status != "Completed" and (d - date.today()).days <= 3:
                         due_status = "Due Soon"
             except Exception:
@@ -155,9 +153,7 @@ class TodoApp:
 
             # decide tag
             tag = "normal"
-            if due_status == "Very Overdue":
-                tag = "very_overdue"
-            elif due_status == "Overdue":
+            if due_status == "Overdue":
                 tag = "overdue"
             elif due_status == "Due Soon":
                 tag = "due_soon"
