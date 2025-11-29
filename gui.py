@@ -109,7 +109,7 @@ class TodoApp:
 
         # Row tags for styling
         self.tree.tag_configure("overdue", background="#ffcccc")
-        self.tree.tag_configure("urgent", background="#fff2cc")
+        self.tree.tag_configure("due_soon", background="#fff2cc")
         self.tree.tag_configure("completed", background="#ccffcc")
         self.tree.tag_configure("normal", background="")
 
