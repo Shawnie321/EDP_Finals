@@ -56,6 +56,41 @@ class TodoApp:
         ttk.Button(frm_buttons, text="Sync", command=self.on_sync_click).pack(side="left", padx=4)
         ttk.Button(frm_buttons, text="Refresh", command=self.refresh_list).pack(side="left", padx=4)
 
+        # Extra controls for priority and snooze
+        frm_extra = ttk.Frame(self.root, padding=6)
+        frm_extra.pack(fill="x")
+        self.lbl_set_priority = ttk.Label(frm_extra, text="Set Priority:")
+        self.lbl_set_priority.pack(side="left", padx=(4, 2))
+        self.cmb_set_priority = ttk.Combobox(frm_extra, values=list(PRIORITY_LEVELS), width=12)
+        self.cmb_set_priority.set("Normal")
+        self.cmb_set_priority.pack(side="left", padx=(0, 8))
+        self.btn_set_priority = ttk.Button(frm_extra, text="Apply Priority", command=self.on_set_priority_click)
+        self.btn_set_priority.pack(side="left", padx=4)
+        self.lbl_set_priority.pack_forget()
+        self.cmb_set_priority.pack_forget()
+        self.btn_set_priority.pack_forget()
+
+        ttk.Label(frm_extra, text="Snooze days:").pack(side="left", padx=(12, 2))
+        self.spin_snooze = ttk.Spinbox(frm_extra, from_=1, to=30, width=5)
+        self.spin_snooze.set("1")
+        self.spin_snooze.pack(side="left", padx=(0, 8))
+        ttk.Button(frm_extra, text="Snooze", command=self.on_snooze_click).pack(side="left", padx=4)
+
+        # Extra controls for priority and snooze
+        frm_extra = ttk.Frame(self.root, padding=6)
+        frm_extra.pack(fill="x")
+        ttk.Label(frm_extra, text="Set Priority:").pack(side="left", padx=(4, 2))
+        self.cmb_set_priority = ttk.Combobox(frm_extra, values=list(PRIORITY_LEVELS), width=12)
+        self.cmb_set_priority.set("Normal")
+        self.cmb_set_priority.pack(side="left", padx=(0, 8))
+        ttk.Button(frm_extra, text="Apply Priority", command=self.on_set_priority_click).pack(side="left", padx=4)
+
+        ttk.Label(frm_extra, text="Snooze days:").pack(side="left", padx=(12, 2))
+        self.spin_snooze = ttk.Spinbox(frm_extra, from_=1, to=30, width=5)
+        self.spin_snooze.set("1")
+        self.spin_snooze.pack(side="left", padx=(0, 8))
+        ttk.Button(frm_extra, text="Snooze", command=self.on_snooze_click).pack(side="left", padx=4)
+
         # Treeview with urgency and due-status columns
         # include notes column (short preview) and keep an accessible cols list
         self.cols = ("id", "title", "notes", "due_date", "priority", "status", "urgency", "due_status")
@@ -79,7 +114,7 @@ class TodoApp:
         self.tree.tag_configure("normal", background="")
 
         # Bind double-click to quick snooze (example)
-        self.tree.bind("<Double-1>", self.on_tree_double_click)
+        self.tree.bind("<Double-1>", self.on_double_click)
 
         # Search/filter bar
         frm_search = ttk.Frame(self.root, padding=8)
@@ -144,8 +179,10 @@ class TodoApp:
                     d = datetime.fromisoformat(t.due_date).date()
                     if status != "Completed" and d < date.today():
                         days_past = (date.today() - d).days
-                        # treat any past due date as just "Overdue" (no "Very Overdue" distinction)
-                        due_status = "Overdue"      
+                        if days_past >= 7:
+                            due_status = "Very Overdue"
+                        else:
+                            due_status = "Overdue"
                     elif status != "Completed" and (d - date.today()).days <= 3:
                         due_status = "Due Soon"
             except Exception:
@@ -153,7 +190,9 @@ class TodoApp:
 
             # decide tag
             tag = "normal"
-            if due_status == "Overdue":
+            if due_status == "Very Overdue":
+                tag = "very_overdue"
+            elif due_status == "Overdue":
                 tag = "overdue"
             elif due_status == "Due Soon":
                 tag = "due_soon"
@@ -461,7 +500,7 @@ class TodoApp:
         except Exception as ex:
             messagebox.showerror("Analytics Error", f"Failed to open analytics: {ex}")
 
-    def on_pick_due_date(self):
+                def on_pick_due_date(self):
         """Open a simple date picker dialog."""
         date_win = tk.Toplevel(self.root)
         date_win.title("Pick Due Date")
@@ -562,6 +601,7 @@ class TodoApp:
                 messagebox.showerror("Date Error", f"Invalid date: {ex}", parent=date_win)
 
         ttk.Button(date_win, text="Apply", command=apply_date).grid(row=3, column=0, columnspan=2, pady=12)
+
 
 def main():
     root = tk.Tk()
