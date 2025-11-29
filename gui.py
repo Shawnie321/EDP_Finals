@@ -45,11 +45,16 @@ class TodoApp:
         # Extra controls for priority and snooze
         frm_extra = ttk.Frame(self.root, padding=6)
         frm_extra.pack(fill="x")
-        ttk.Label(frm_extra, text="Set Priority:").pack(side="left", padx=(4, 2))
+        self.lbl_set_priority = ttk.Label(frm_extra, text="Set Priority:")
+        self.lbl_set_priority.pack(side="left", padx=(4, 2))
         self.cmb_set_priority = ttk.Combobox(frm_extra, values=list(PRIORITY_LEVELS), width=12)
         self.cmb_set_priority.set("Normal")
         self.cmb_set_priority.pack(side="left", padx=(0, 8))
-        ttk.Button(frm_extra, text="Apply Priority", command=self.on_set_priority_click).pack(side="left", padx=4)
+        self.btn_set_priority = ttk.Button(frm_extra, text="Apply Priority", command=self.on_set_priority_click)
+        self.btn_set_priority.pack(side="left", padx=4)
+        self.lbl_set_priority.pack_forget()
+        self.cmb_set_priority.pack_forget()
+        self.btn_set_priority.pack_forget()
 
         ttk.Label(frm_extra, text="Snooze days:").pack(side="left", padx=(12, 2))
         self.spin_snooze = ttk.Spinbox(frm_extra, from_=1, to=30, width=5)
@@ -77,6 +82,7 @@ class TodoApp:
 
         # Bind double-click to quick snooze (example)
         self.tree.bind("<Double-1>", self.on_double_click)
+        self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
 
     def refresh_list(self):
         for i in self.tree.get_children():
@@ -220,6 +226,17 @@ class TodoApp:
             show_analytics_tk(self.tm, parent=self.root, days_back=14)
         except Exception as ex:
             messagebox.showerror("Analytics Error", f"Failed to open analytics: {ex}")
+
+    def on_tree_select(self, event):
+        sel = self.tree.selection()
+        if sel:
+            self.lbl_set_priority.pack(side="left", padx=(4, 2))
+            self.cmb_set_priority.pack(side="left", padx=(0, 8))
+            self.btn_set_priority.pack(side="left", padx=4)
+        else:
+            self.lbl_set_priority.pack_forget()
+            self.cmb_set_priority.pack_forget()
+            self.btn_set_priority.pack_forget()
 
 
 def main():

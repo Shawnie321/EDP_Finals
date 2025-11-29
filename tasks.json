@@ -1,61 +1,16 @@
 [
   {
-    "id": 2,
-    "title": "Finish Python project",
-    "due_date": "2025-11-10",
-    "priority": "High",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 3,
-    "title": "Finish Python project",
-    "due_date": "2025-11-10",
-    "priority": "High",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 4,
-    "title": "Finish Python project",
-    "due_date": "2025-11-10",
-    "priority": "High",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 5,
-    "title": "Finish Python project",
-    "due_date": "2025-11-10",
-    "priority": "High",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 6,
-    "title": "Finish Python project",
-    "due_date": "2025-11-10",
-    "priority": "High",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 17,
-    "title": "Fuck You",
-    "due_date": "2025-11-01",
+    "id": 24,
+    "title": "App dev",
+    "due_date": "2025-12-13",
     "priority": "Normal",
-    "status": "Pending",
+    "status": "Completed",
     "created_at": null,
     "updated_at": null
   },
   {
-    "id": 18,
-    "title": "Fuck us",
+    "id": 25,
+    "title": "linis ako bahay",
     "due_date": "2025-11-18",
     "priority": "High",
     "status": "Pending",
@@ -63,12 +18,57 @@
     "updated_at": null
   },
   {
-    "id": 19,
-    "title": "Fucker",
-    "due_date": "2025-11-29",
+    "id": 26,
+    "title": "kumain ng sisig ni tatay",
+    "due_date": "2025-11-15",
     "priority": "Normal",
+    "status": "Completed",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 29,
+    "title": "mag jakol",
+    "due_date": "2025-11-27",
+    "priority": "Normal",
+    "status": "Completed",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 34,
+    "title": "maglaba",
+    "due_date": "2025-11-28",
+    "priority": "High",
+    "status": "Completed",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 35,
+    "title": "jhgjh",
+    "due_date": "2025-11-28",
+    "priority": "Critical",
     "status": "Pending",
-    "created_at": "2025-11-12T11:08:52Z",
-    "updated_at": "2025-11-12T11:08:52Z"
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 36,
+    "title": "zxc",
+    "due_date": "2025-11-28",
+    "priority": "Normal",
+    "status": "Completed",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 40,
+    "title": "tae",
+    "due_date": "2024-10-10",
+    "priority": "Low",
+    "status": "Pending",
+    "created_at": "2025-11-29T07:16:08Z",
+    "updated_at": "2025-11-29T07:17:57Z"
   }
 ]
