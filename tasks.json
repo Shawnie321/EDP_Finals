@@ -74,10 +74,19 @@
   {
     "id": 41,
     "title": "magchaos clash",
-    "due_date": "2025-12-07",
+    "due_date": "2025-11-30",
     "priority": "High",
     "status": "Pending",
     "created_at": null,
-    "updated_at": "2025-11-29T10:21:26Z"
+    "updated_at": null
+  },
+  {
+    "id": 43,
+    "title": "mag charge",
+    "due_date": "2025-11-30",
+    "priority": "Normal",
+    "status": "Pending",
+    "created_at": null,
+    "updated_at": "2025-11-30T12:53:20Z"
   }
 ]
