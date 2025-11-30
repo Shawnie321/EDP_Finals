@@ -20,7 +20,6 @@ def _normalize_priority(p: Optional[str]) -> str:
         return "Normal"
     p = str(p).strip().title()
     if p not in PRIORITY_LEVELS:
-        # allow synonyms like "critical", "high", etc.
         for lvl in PRIORITY_LEVELS:
             if lvl.lower() == p.lower():
                 return lvl
@@ -32,7 +31,7 @@ def _normalize_priority(p: Optional[str]) -> str:
 class Task:
     task_id: Optional[int]
     title: str
-    due_date: Optional[str] = None  # ISO YYYY-MM-DD or None
+    due_date: Optional[str] = None 
     status: str = "Pending"
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
@@ -90,32 +89,15 @@ class PriorityTask(Task):
 
 
 class TaskManager:
-    """
-    In-memory manager for Task / PriorityTask objects with JSON serialization and
-    optional Supabase persistence via DatabaseManager.
-
-    Added features:
-     - normalized priority levels and weights
-     - created_at / updated_at timestamps
-     - helpers: set_priority, get_overdue_tasks, get_tasks_by_priority,
-       upcoming_deadlines, snooze_task, urgency scoring and sorting
-     - sync_with_remote updated to handle priority and timestamps
-    """
 
     def __init__(self, db: Optional[DatabaseManager] = None, json_file: str = TASKS_JSON):
         self.db = db or DatabaseManager()
         self.json_file = json_file
         self.tasks: List[PriorityTask] = []
-        # load initial data (prefers DB if available)
         self.load()
 
-    # -----------------------
     # Loading / Saving
-    # -----------------------
     def load(self) -> None:
-        """
-        Load tasks from Supabase if available; otherwise load from JSON file.
-        """
         try:
             if getattr(self.db, "supabase", None):
                 rows = self.db.get_all_tasks() or []
@@ -123,7 +105,6 @@ class TaskManager:
             else:
                 self.tasks = self._load_json_tasks()
         except Exception:
-            # on any failure fallback to JSON
             self.tasks = self._load_json_tasks()
 
     def _load_json_tasks(self) -> List[PriorityTask]:
@@ -143,16 +124,11 @@ class TaskManager:
         except Exception as ex:
             print("❗ Failed to save tasks JSON:", ex)
 
-    # -----------------------
     # CRUD operations
-    # -----------------------
     def _next_local_id(self) -> int:
         return max((t.task_id or 0 for t in self.tasks), default=0) + 1
 
     def add_task(self, title: str, due_date: Optional[str] = None, priority: str = "Normal", status: str = "Pending") -> PriorityTask:
-        """
-        Add a task. Sets created_at/updated_at and normalized priority.
-        """
         now = _now_iso()
         priority_n = _normalize_priority(priority)
         if getattr(self.db, "supabase", None):
@@ -163,7 +139,6 @@ class TaskManager:
             elif isinstance(resp, dict):
                 row = resp
             if row:
-                # ensure timestamps/priority normalized from row
                 task = PriorityTask.from_dict(row)
                 if not task.created_at:
                     task.created_at = now
@@ -171,7 +146,6 @@ class TaskManager:
                 self.tasks.append(task)
                 self.save_json()
                 return task
-        # Local creation
         local_id = self._next_local_id()
         task = PriorityTask(task_id=local_id, title=title, due_date=due_date, status=status, priority_level=priority_n, created_at=now, updated_at=now)
         self.tasks.append(task)
@@ -179,14 +153,9 @@ class TaskManager:
         return task
 
     def update_task(self, task_id: int, **fields) -> Optional[PriorityTask]:
-        """
-        Update fields on a task (title, due_date, status, priority_level).
-        Updates updated_at automatically.
-        """
         task = next((t for t in self.tasks if t.task_id == task_id), None)
         if not task:
             return None
-        # apply allowed fields
         for k in ("title", "due_date", "status", "priority_level"):
             if k in fields:
                 if k == "priority_level":
@@ -194,10 +163,7 @@ class TaskManager:
                 else:
                     setattr(task, k, fields[k])
         task.updated_at = _now_iso()
-        # persist to remote where possible
         if getattr(self.db, "supabase", None):
-            # update status or priority on remote; DatabaseManager currently supports status updates only,
-            # so call update_task_status for status; for priority we may re-insert or leave in sync step.
             if "status" in fields:
                 try:
                     self.db.update_task_status(task_id, task.status)
@@ -210,9 +176,6 @@ class TaskManager:
         return self.update_task(task_id, status="Completed")
 
     def delete_task(self, task_id: int) -> bool:
-        """
-        Delete task locally and in DB (if available). Returns True if deleted.
-        """
         task = next((t for t in self.tasks if t.task_id == task_id), None)
         if not task:
             return False
@@ -225,13 +188,8 @@ class TaskManager:
         self.save_json()
         return True
 
-    # -----------------------
     # Priority & deadline helpers
-    # -----------------------
     def set_priority(self, task_id: int, priority: str) -> Optional[PriorityTask]:
-        """
-        Set priority for a task and persist locally (and try remote via sync).
-        """
         return self.update_task(task_id, priority_level=priority)
 
     def get_tasks_by_priority(self, priority: str) -> List[PriorityTask]:
@@ -253,9 +211,6 @@ class TaskManager:
         return overdue
 
     def upcoming_deadlines(self, days: int = 7) -> List[PriorityTask]:
-        """
-        Return tasks with due_date within the next `days` days (inclusive) and not completed.
-        """
         today = date.today()
         end = today + timedelta(days=days)
         upcoming = []
@@ -271,9 +226,6 @@ class TaskManager:
         return sorted(upcoming, key=lambda tt: (datetime.fromisoformat(tt.due_date).date() if tt.due_date else date.max))
 
     def snooze_task(self, task_id: int, days: int = 1) -> Optional[PriorityTask]:
-        """
-        Move a task's due_date forward by `days`. Returns updated task or None.
-        """
         task = next((t for t in self.tasks if t.task_id == task_id), None)
         if not task or not task.due_date:
             return None
@@ -288,12 +240,6 @@ class TaskManager:
             return None
 
     def compute_urgency_score(self, task: PriorityTask, now_date: Optional[date] = None) -> float:
-        """
-        Simple urgency score combining priority weight and proximity to due date.
-        Higher score = more urgent.
-        score = priority_weight * (1 + max(0, (deadline_factor)))
-        deadline_factor = (max_days - days_until_due) / max_days
-        """
         if now_date is None:
             now_date = date.today()
         weight = PRIORITY_WEIGHT.get(getattr(task, "priority_level", "Normal"), 2)
@@ -304,11 +250,10 @@ class TaskManager:
         except Exception:
             return float(weight)
         days_until = (d - now_date).days
-        # consider a window of 30 days for scaling
         max_days = 30.0
         deadline_factor = 0.0
         if days_until <= 0:
-            deadline_factor = 1.0  # overdue or due today -> maximal urgency
+            deadline_factor = 1.0  
         else:
             deadline_factor = max(0.0, (max_days - days_until) / max_days)
         score = weight * (1.0 + deadline_factor)
@@ -317,18 +262,11 @@ class TaskManager:
     def get_sorted_by_urgency(self) -> List[PriorityTask]:
         return sorted(self.tasks, key=lambda t: self.compute_urgency_score(t), reverse=True)
 
-    # -----------------------
     # Sync / Helpers
-    # -----------------------
     def to_list_of_dicts(self) -> List[Dict[str, Any]]:
         return [t.to_dict() for t in self.tasks]
 
     def sync_with_remote(self, prefer_local: bool = True) -> Dict[str, int]:
-        """
-        Reconciliation between local JSON state and Supabase.
-
-        Now preserves and syncs priority and timestamps where possible.
-        """
         summary = {"pushed": 0, "pulled": 0, "updated": 0}
         if not getattr(self.db, "supabase", None):
             return summary
@@ -338,7 +276,6 @@ class TaskManager:
             remote_by_id = {r.get("id"): r for r in remote_rows if r.get("id") is not None}
             local_by_id = {t.task_id: t for t in self.tasks if t.task_id is not None}
 
-            # Pull remote rows into local storage
             for rid, rrow in remote_by_id.items():
                 if rid in local_by_id:
                     local = local_by_id[rid]
@@ -367,15 +304,12 @@ class TaskManager:
                         local.updated_at = remote_simple.get("updated_at", _now_iso())
                         summary["updated"] += 1
                 else:
-                    # remote only -> add locally
                     self.tasks.append(PriorityTask.from_dict(rrow))
                     summary["pulled"] += 1
 
-            # Push local-only tasks to remote
             remote_ids = set(remote_by_id.keys())
             for local in list(self.tasks):
                 if local.task_id is None or local.task_id not in remote_ids:
-                    # push
                     resp = self.db.add_task_to_db(local.title, local.due_date, getattr(local, "priority_level", "Normal"), local.status)
                     row = None
                     if isinstance(resp, list) and len(resp):
@@ -383,11 +317,9 @@ class TaskManager:
                     elif isinstance(resp, dict):
                         row = resp
                     if row and row.get("id") is not None:
-                        # update local id to server id
                         local.task_id = row.get("id")
                     summary["pushed"] += 1
 
-            # persist final local state
             self.save_json()
         except Exception as ex:
             print("❗ Sync failed:", ex)

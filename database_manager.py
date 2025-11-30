@@ -10,11 +10,6 @@ JSON_FALLBACK_FILE = "tasks.json"
 
 
 class DatabaseManager:
-    """
-    Supabase-backed task persistence with optional JSON fallback.
-    Methods return data (or None) and print status for debugging.
-    """
-
     def __init__(self, use_json_fallback_if_no_env: bool = True):
         load_dotenv()
         self.url = os.getenv("SUPABASE_URL")
@@ -33,14 +28,11 @@ class DatabaseManager:
             if not use_json_fallback_if_no_env:
                 raise EnvironmentError("Supabase credentials are required")
 
-        # Ensure fallback file exists
         if not os.path.exists(JSON_FALLBACK_FILE):
             with open(JSON_FALLBACK_FILE, "w", encoding="utf-8") as f:
                 json.dump([], f)
 
-    # ----------------------
     # Core CRUD
-    # ----------------------
     def add_task_to_db(self, title: str, due_date: str, priority: str, status: str = "Pending") -> Optional[Dict]:
         data = {"title": title, "due_date": due_date, "priority": priority, "status": status}
         if self.supabase:
@@ -63,7 +55,6 @@ class DatabaseManager:
     def get_all_tasks(self) -> List[Dict]:
         if self.supabase:
             try:
-                # use simple order call compatible with installed supabase client
                 response = self.supabase.table("tasks").select("*").order("id").execute()
                 return response.data or []
             except Exception as ex:
@@ -85,7 +76,6 @@ class DatabaseManager:
             except Exception as ex:
                 print("❗ Supabase update failed:", ex)
                 return None
-        # JSON fallback
         tasks = self._load_json_tasks()
         for t in tasks:
             if t.get("id") == task_id:
@@ -114,9 +104,7 @@ class DatabaseManager:
         print("🔴 Task deleted from JSON fallback:", task_id)
         return {"deleted_id": task_id}
 
-    # ----------------------
     # Analytics helpers (useful for GUI)
-    # ----------------------
     def get_completed_counts_per_day(self, days_back: int = 14) -> Dict[str, int]:
         """
         Returns dict mapping YYYY-MM-DD -> completed_count for the last `days_back` days.
@@ -127,18 +115,16 @@ class DatabaseManager:
 
         if self.supabase:
             try:
-                # request timestamps that may indicate when a task was completed
                 response = (
                     self.supabase.table("tasks")
                     .select("id,due_date,created_at,updated_at,completed_at")
                     .eq("status", "Completed")
-                    .gte("due_date", str(start))  # keep filter, but we'll prefer timestamps below
+                    .gte("due_date", str(start))  
                     .lte("due_date", str(end))
                     .execute()
                 )
                 rows = response.data or []
                 for r in rows:
-                    # prefer completed_at, then updated_at, then due_date/created_at
                     d = r.get("completed_at") or r.get("updated_at") or r.get("due_date") or r.get("created_at")
                     if not d:
                         continue
@@ -155,7 +141,6 @@ class DatabaseManager:
                     if start <= datetime.fromisoformat(d).date() <= end:
                         counts[d.split("T")[0] if "T" in d else d] += 1
 
-        # Ensure all days in range are present (zero-filled)
         result = {}
         for i in range(days_back):
             day = str(start + timedelta(days=i))
@@ -181,9 +166,7 @@ class DatabaseManager:
                 counter[t.get("priority", "Unknown")] += 1
         return dict(counter)
 
-    # ----------------------
     # JSON fallback helpers
-    # ----------------------
     def _load_json_tasks(self) -> List[Dict]:
         try:
             with open(JSON_FALLBACK_FILE, "r", encoding="utf-8") as f:
@@ -198,8 +181,6 @@ class DatabaseManager:
         except Exception as ex:
             print("❗ Failed to save JSON fallback:", ex)
 
-    # ----------------------
     # Utility: helpful but non-destructive
-    # ----------------------
     def create_table_in_supabase(self):
         raise NotImplementedError("Use Supabase SQL Editor or provide permission to run DDL.")

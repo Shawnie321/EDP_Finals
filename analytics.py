@@ -1,11 +1,3 @@
-"""
-analytics.py
-
-Build Matplotlib charts from either a DatabaseManager or TaskManager.
-The functions will:
- - prefer `get_completed_counts_per_day` / `get_priority_distribution` when available,
- - otherwise compute counts from `task_manager.tasks`.
-"""
 from typing import Dict, Any, Optional
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -56,13 +48,6 @@ def _get_counts_and_priority(db_like, days_back: int = 14):
     return counts, prio
 
 def create_analytics_figure(db_manager: Any, days_back: int = 14, theme: str = 'light') -> Figure:
-    """
-    Build a matplotlib Figure:
-     - top: bar + line (tasks completed per day)
-     - bottom-left: pie chart (priority distribution)
-     - bottom-right: summary stats
-    Accepts DatabaseManager or TaskManager.
-    """
     counts, prio_dist = _get_counts_and_priority(db_manager, days_back=days_back)
 
     dates = sorted(counts.keys())
@@ -156,10 +141,6 @@ def create_analytics_figure(db_manager: Any, days_back: int = 14, theme: str = '
     return fig
 
 def show_analytics_tk(db_manager: Any, parent: Optional[tk.Misc] = None, days_back: int = 14, theme: str = 'light') -> dict:
-    """
-    Open a Tk Toplevel (or root if parent is None) and embed the analytics Figure.
-    Accepts TaskManager or DatabaseManager.
-    """
     own_root = False
     if parent is None:
         root = tk.Tk()
