@@ -4,8 +4,7 @@ from datetime import datetime, date
 from typing import Dict, List
 
 from task_manager import TaskManager, PRIORITY_LEVELS
-from analytics import show_analytics_tk  # unchanged import
-
+from analytics import show_analytics_tk
 
 class TodoApp:
     def __init__(self, root: tk.Tk):
@@ -20,12 +19,11 @@ class TodoApp:
         self.tm = TaskManager()
         self.sort_column = None
         self.sort_reverse = False
-        self.current_theme = "light"  # default theme
+        self.current_theme = "light" 
 
         # Styling
         self.style = ttk.Style(self.root)
         try:
-            # clam is a good neutral base that allows customizing heading bg
             self.style.theme_use("clam")
         except Exception:
             pass
@@ -49,7 +47,7 @@ class TodoApp:
         self.style.configure("SubHeader.TLabel", font=semibold, background="#f3f3f3")
         self.style.configure("Modern.TLabel", font=default_font, background="#f3f3f3")
 
-        # Entries (flat)
+        # Entries
         self.style.configure("Modern.TEntry",
                              font=default_font,
                              fieldbackground="#ffffff",
@@ -57,8 +55,6 @@ class TodoApp:
                              relief="flat",
                              padding=6)
 
-        # Combobox - theme-aware baseline (entry portion + fieldbackground)
-        # Use a dedicated style name so we can update it from _apply_theme
         self.style.configure("Modern.TCombobox",
                              font=default_font,
                              fieldbackground="#ffffff",
@@ -72,8 +68,7 @@ class TodoApp:
         except Exception:
             pass
 
-        # Spinbox (ttk) - make a modern themed spinbox style
-        # fieldbackground controls the edit field color
+        # Spinbox
         try:
             self.style.configure("Modern.TSpinbox",
                                  font=default_font,
@@ -85,10 +80,9 @@ class TodoApp:
                            fieldbackground=[("!disabled", "#ffffff"), ("disabled", "#f0f0f0")],
                            foreground=[("!disabled", "#000000"), ("disabled", "#888888")])
         except Exception:
-            # older ttk themes / tk versions may raise — ignore gracefully
             pass
 
-        # Buttons (neutral gray, flat)
+        # Buttons
         self.style.configure("Modern.TButton",
                              font=semibold,
                              background="#e6e6e6",
@@ -99,7 +93,7 @@ class TodoApp:
                        background=[("active", "#d4d4d4"), ("disabled", "#f0f0f0")],
                        relief=[("pressed", "flat")])
 
-        # Small icon-ish button (baseline)
+        # Small icon button
         self.style.configure("Icon.TButton",
                              font=("Segoe UI Semibold", 9),
                              padding=4,
@@ -114,12 +108,11 @@ class TodoApp:
         self.style.configure("Modern.Treeview", font=default_font, rowheight=28, background="#ffffff", fieldbackground="#ffffff")
         self.style.configure("Modern.Treeview.Heading", font=semibold, background="#f3f3f3")
         try:
-            # keep default layout but allow custom heading bg to show
             self.style.layout("Treeheading.Cell", self.style.layout("Treeheading.Cell"))
         except Exception:
             pass
 
-        # Scrollbar styling (subtle)
+        # Scrollbar
         try:
             self.style.configure("Modern.Vertical.TScrollbar",
                                  troughcolor="#f3f3f3",
@@ -172,9 +165,7 @@ class TodoApp:
         # Entries
         self.style.configure("Modern.TEntry", fieldbackground=panel_bg, background=panel_bg, foreground=fg)
 
-        # Combobox: update entry/field colours to match panel and text colour
         try:
-            # prefer to set arrowcolor when available (Tk 8.6.x+ on many platforms)
             self.style.configure("Modern.TCombobox",
                                  fieldbackground=panel_bg,
                                  background=panel_bg,
@@ -184,7 +175,6 @@ class TodoApp:
                            fieldbackground=[("readonly", panel_bg), ("!disabled", panel_bg)],
                            foreground=[("disabled", "#888888"), ("!disabled", fg)])
         except Exception:
-            # older Tk / themes may not accept arrowcolor — ignore and keep other settings
             try:
                 self.style.configure("Modern.TCombobox",
                                      fieldbackground=panel_bg,
@@ -196,7 +186,7 @@ class TodoApp:
             except Exception:
                 pass
 
-        # Spinbox: update to match panel colors
+        # Spinbox
         try:
             self.style.configure("Modern.TSpinbox",
                                  fieldbackground=panel_bg,
@@ -208,7 +198,6 @@ class TodoApp:
         except Exception:
             pass
 
-        # Also make dropdown list match panel where possible (affects tk.Listbox used by the popdown)
         try:
             self.root.option_add("*Listbox.background", panel_bg)
             self.root.option_add("*Listbox.foreground", fg)
@@ -217,11 +206,10 @@ class TodoApp:
         except Exception:
             pass
 
-        # Buttons remain neutral gray but adapt to theme
         self.style.configure("Modern.TButton", background=button_bg, foreground=fg)
         self.style.map("Modern.TButton", background=[("active", button_active), ("disabled", "#f0f0f0")])
 
-        # Icon button (calendar / small icons) — follow same theme colours
+        # Icon button
         try:
             self.style.configure("Icon.TButton", background=button_bg, foreground=fg)
             self.style.map("Icon.TButton",
@@ -238,13 +226,12 @@ class TodoApp:
         try:
             self.style.configure("Modern.Vertical.TScrollbar", troughcolor = root_bg, background = scrollbar_bg, arrowcolor = fg)
             self.style.configure("Modern.Horizontal.TScrollbar", troughcolor = root_bg, background = scrollbar_bg, arrowcolor = fg)
-            # also map active state for visual feedback
             self.style.map("Modern.Vertical.TScrollbar", background = [("active", button_active), ("!active", scrollbar_bg)])
             self.style.map("Modern.Horizontal.TScrollbar", background = [("active", button_active), ("!active", scrollbar_bg)])
         except Exception:
             pass
 
-        # Tag colors for rows (soft pastels for light mode; richer for dark)
+        # Tag colors for rows
         if mode == "dark":
             self.tree_tag_colors = {
                 "overdue": "#5a1515",
@@ -255,10 +242,10 @@ class TodoApp:
             }
         else:
             self.tree_tag_colors = {
-                "overdue": "#ffecec",
-                "due_soon": "#fff8e6",
-                "completed": "#e6ffed",
-                "urgent": "#fff3e6",
+                "overdue": "#FFBDBD",
+                "due_soon": "#FFECC5",
+                "completed": "#C1FFD8",
+                "urgent": "#FFDFBD",
                 "normal": row_bg
             }
 
@@ -267,14 +254,13 @@ class TodoApp:
         except Exception:
             pass
 
-        # Update theme toggle tk.Button (icon + colors) if it exists
+        # theme toggle tk.Button
         try:
             if hasattr(self, "theme_icon_btn") and self.theme_icon_btn:
                 icon_text = ("🌙" if getattr(self, "current_theme", "light") == "light" else "☀️")
                 try:
                     self.theme_icon_btn.configure(text=icon_text, bg=button_bg, fg=fg, activebackground=button_active, bd=0, relief="flat")
                 except Exception:
-                    # some platforms may require different keys; ignore failures
                     try:
                         self.theme_icon_btn.configure(text=icon_text)
                     except Exception:
@@ -282,7 +268,6 @@ class TodoApp:
         except Exception:
             pass
 
-        # Reconfigure existing tree tags if tree exists
         if hasattr(self, "tree"):
             for tag, color in self.tree_tag_colors.items():
                 try:
@@ -290,17 +275,16 @@ class TodoApp:
                 except Exception:
                     pass
 
-        # Update text widgets theme-aware colors (notes/edit)
+        # text widgets theme colors 
         try:
             if hasattr(self, "entry_notes"):
                 self.entry_notes.config(bg=panel_bg, fg=fg, insertbackground=fg)
         except Exception:
             pass
 
-        # Update paned sash and separators: ttk.Panedwindow has no direct style, tweak through widget config
+        # paned sash and separators
         try:
-            # change trough/background for the paned widget and sash color via option database where possible
-            # On some themes this may have no visible effect; set the paned background and the separator color through the parent
+
             if hasattr(self, "paned"):
                 try:
                     self.paned.configure(style="Modern.TFrame")
@@ -310,9 +294,8 @@ class TodoApp:
             pass
 
     def _toggle_theme(self):
-        # flip theme, reapply styles and refresh UI; also update the toggle icon immediately
+        # flip theme
         self.current_theme = "dark" if self.current_theme == "light" else "light"
-        # update icon text on the button (safe-guard if button exists)
         try:
             if hasattr(self, "theme_icon_btn") and self.theme_icon_btn:
                 icon_text = ("🌙" if self.current_theme == "light" else "☀️")
@@ -325,7 +308,7 @@ class TodoApp:
 
         self._apply_theme(self.current_theme)
         self.refresh_list()
-        # update analytics theme if open
+        # analytics
         try:
             if hasattr(self, "analytics_win") and self.analytics_win:
                 updater = self.analytics_win.get("update_theme") if isinstance(self.analytics_win, dict) else None
@@ -339,12 +322,10 @@ class TodoApp:
         container = ttk.Frame(self.root, style="Modern.TFrame", padding=10)
         container.pack(fill="both", expand=True)
 
-        # Paned window to separate left and right (keeps layout stable)
-        # keep a reference so theme updates can tweak the sash/background
         self.paned = ttk.Panedwindow(container, orient=tk.HORIZONTAL)
         self.paned.pack(fill="both", expand=True)
 
-        # Left sidebar (you chose light gray)
+        # Left sidebar
         self.left = ttk.Frame(self.paned, style="Sidebar.TFrame", width=350)
         self.left.pack_propagate(False)
         self.paned.add(self.left, weight=0)
@@ -353,18 +334,18 @@ class TodoApp:
         right = ttk.Frame(self.paned, style="Modern.TFrame")
         self.paned.add(right, weight=1)
 
-        # Header (title) inside left
+        # Header inside left
         header_container = ttk.Frame(self.left, style="Sidebar.TFrame")
         header_container.pack(fill="x", padx=12, pady=(12, 6))
         ttk.Label(header_container, text="Smart To-Do List", style="Header.TLabel", anchor="w").pack(fill="x")
 
-        # Theme toggle button (tk.Button for predictable bg)
+        # Theme toggle button
         icon_text = ("🌙" if self.current_theme == "light" else "☀️")
         self.theme_icon_btn = tk.Button(self.root, text=icon_text, command=self._toggle_theme,
                                        bd=0, relief="flat")
         self.theme_icon_btn.place(relx=1.0, x=-40, y=35, anchor="ne")
 
-        # Input frame inside left (panel look)
+        # Input frame inside left
         inp_frame_outer = ttk.Frame(self.left, style="Panel.TFrame", padding=10)
         inp_frame_outer.pack(fill="both", expand=False, padx=12, pady=(6, 0))
         inp_frame_outer.columnconfigure(1, weight=1)
@@ -388,15 +369,14 @@ class TodoApp:
         self.entry_priority.set("Normal")
         self.entry_priority.grid(row=2, column=1, sticky="w", padx=(8, 0), pady=6)
 
-        # Notes (Text widget inside panel to give 'card' look)
+        # Notes
         ttk.Label(inp_frame_outer, text="Notes:", style="SubHeader.TLabel").grid(row=3, column=0, sticky="nw", pady=(6, 0))
         notes_frame = ttk.Frame(inp_frame_outer, style="Panel.TFrame", padding=4)
         notes_frame.grid(row=3, column=1, sticky="ew", padx=(8, 0), pady=(6, 0))
         self.entry_notes = tk.Text(notes_frame, height=6, bd=0, relief="flat", wrap="word")
         self.entry_notes.pack(fill="both", expand=True)
-        # Ensure the text widget colours match the panel in _apply_theme
 
-        # Action buttons (neutral gray) - slightly rounded feel via padding
+        # Action buttons
         btn_frame = ttk.Frame(self.left, style="Sidebar.TFrame")
         btn_frame.pack(fill="x", padx=12, pady=(12, 12))
         ttk.Button(btn_frame, text="Add", command=self.on_add_click, style="Modern.TButton").pack(fill="x", pady=6)
@@ -407,7 +387,7 @@ class TodoApp:
         ttk.Button(btn_frame, text="Analytics", command=self.on_analytics_click, style="Modern.TButton").pack(fill="x", pady=6)
         ttk.Button(btn_frame, text="Sync", command=self.on_sync_click, style="Modern.TButton").pack(fill="x", pady=6)
 
-        # Right area: Search + Tree inside a white panel for card feel
+        # Right area
         right_top = ttk.Frame(right, style="Panel.TFrame", padding=(10, 8))
         right_top.pack(fill="x", padx=12, pady=(12, 6))
         ttk.Label(right_top, text="Search:", style="SubHeader.TLabel").grid(row=0, column=0, sticky="w")
@@ -420,11 +400,8 @@ class TodoApp:
         tree_container.pack(fill="both", expand=True, padx=12, pady=(6, 12))
 
         # Scrollbars
-        # Keep references to the scrollbars so we can reconfigure them when theme changes
         self.h_scroll = ttk.Scrollbar(tree_container, orient="horizontal", style="Modern.Horizontal.TScrollbar")
         self.v_scroll = ttk.Scrollbar(tree_container, orient="vertical", style="Modern.Vertical.TScrollbar")
-
-        # remove id column from visible columns; we'll store task_id in the item's iid
         self.cols = ("title", "notes", "due_date", "priority", "status", "urgency", "due_status")
         cols = self.cols[:]
         self.tree = ttk.Treeview(tree_container, columns=cols, show="headings", selectmode="extended", style="Modern.Treeview")
@@ -438,7 +415,6 @@ class TodoApp:
         self.v_scroll.grid(row=0, column=1, sticky="ns")
         self.h_scroll.grid(row=1, column=0, sticky="ew", columnspan=2)
 
-        # Adjust column widths now that 'id' is not visible
         headings = [
             ("title", 200), ("notes", 260), ("due_date", 110),
             ("priority", 100), ("status", 100), ("urgency", 80), ("due_status", 100)
@@ -446,12 +422,11 @@ class TodoApp:
         for c, w in headings:
             col_anchor = "w" if c == "title" else "center"
             heading_anchor = "center"
-            # heading click sorts by column
             self.tree.heading(c, text=c.replace("_", " ").title(), anchor=heading_anchor,
                               command=lambda col=c: self.on_column_click(col))
             self.tree.column(c, width=w, anchor=col_anchor)
 
-        # Row tags (colors applied in _apply_theme)
+        # Row tags
         self.tree.tag_configure("overdue", background="#ffcccc")
         self.tree.tag_configure("due_soon", background="#fff2cc")
         self.tree.tag_configure("completed", background="#ccffcc")
@@ -461,9 +436,6 @@ class TodoApp:
         # Bind double click
         self.tree.bind("<Double-1>", self.on_tree_double_click)
 
-    # -------------------------
-    # Data and interactions
-    # -------------------------
     def on_column_click(self, column):
         if self.sort_column == column:
             self.sort_reverse = not self.sort_reverse
@@ -479,7 +451,6 @@ class TodoApp:
         search_term = (self.entry_search.get() or "").lower()
         tasks = getattr(self.tm, "tasks", [])[:] or []
 
-        # Filter by search term across title/priority/status/notes
         filtered_tasks = [
             t for t in tasks if (
                 search_term in (getattr(t, "title", "") or "").lower() or
@@ -539,11 +510,9 @@ class TodoApp:
             elif urgency_score >= 5.0 and tag == "normal":
                 tag = "urgent"
 
-            # values no longer include the id (id stored in iid)
             vals = (title, notes, due, priority, status, f"{urgency_score:.2f}", due_status)
             try:
                 iid = str(tid) if tid is not None else None
-                # if iid is None Treeview will auto-generate one; that's fine for unsaved tasks
                 self.tree.insert("", "end", iid=iid, values=vals, tags=(tag,))
             except Exception:
                 pass
@@ -634,7 +603,7 @@ class TodoApp:
         snooze_win.title("Snooze Task")
         snooze_win.transient(self.root)
         snooze_win.grab_set()
-        self._center_popup(snooze_win, width=315, height=200, parent=self.root)
+        self._center_popup(snooze_win, width=280, height=200, parent=self.root)
 
         container = ttk.Frame(snooze_win, style="Panel.TFrame")
         container.pack(fill="both", expand=True, padx=8, pady=8)
@@ -643,14 +612,13 @@ class TodoApp:
         panel_bg = self.style.lookup("Panel.TFrame", "background") or ("#ffffff" if self.current_theme == "light" else "#2d2d30")
         fg = self.style.lookup("Modern.TLabel", "foreground") or ("#000000" if self.current_theme == "light" else "#ffffff")
 
-        # canvas must share the panel background so rows between buttons don't show system gray
         canvas = tk.Canvas(container, borderwidth=0, highlightthickness=0, bg=panel_bg)
         vscroll = ttk.Scrollbar(container, orient="vertical", command=canvas.yview, style="Modern.Vertical.TScrollbar")
         canvas.configure(yscrollcommand=vscroll.set)
         vscroll.pack(side="right", fill="y")
         canvas.pack(side="left", fill="both", expand=True)
 
-        # inner frame explicitly uses Panel.TFrame so it matches panel_bg
+        # inner frame uses Panel.TFrame
         inner = ttk.Frame(canvas, style="Panel.TFrame")
         canvas.create_window((0, 0), window=inner, anchor="nw")
 
@@ -683,7 +651,7 @@ class TodoApp:
                 self._themed_warning("Snooze", "Failed to snooze task.")
 
         for label, days in presets:
-            ttk.Button(inner, text=label, command=lambda d=days: snooze_by(d), style="Modern.TButton").pack(fill="x", padx=10, pady=4)
+            ttk.Button(inner, text=label, command=lambda d=days: snooze_by(d), style="Modern.TButton", width=30).pack(fill="x", padx=10, pady=4)
 
         ttk.Separator(inner, orient="horizontal").pack(fill="x", padx=10, pady=10)
         ttk.Label(inner, text="Custom days:", style="SubHeader.TLabel", anchor="w").pack(pady=5, padx=10, fill="x")
@@ -803,7 +771,7 @@ class TodoApp:
         btn_frame = ttk.Frame(content, style="Panel.TFrame")
         btn_frame.grid(row=5, column=0, columnspan=2, pady=(8,12))
 
-        # Keep buttons on the panel background and center them
+        # Keep and center buttons on panel bg
         inner_btns = ttk.Frame(btn_frame, style="Panel.TFrame")
         inner_btns.pack(anchor="center")
 
@@ -904,18 +872,16 @@ class TodoApp:
         date_win.grab_set()
         self._center_popup(date_win, width=300, height=240, parent=self.root)
 
-        # theme-aware panel colors
+        # panel colors
         panel_bg = self.style.lookup("Panel.TFrame", "background") or ("#ffffff" if self.current_theme == "light" else "#2d2d30")
         fg = self.style.lookup("Modern.TLabel", "foreground") or ("#000000" if self.current_theme == "light" else "#ffffff")
         button_active = "#d4d4d4" if self.current_theme == "light" else "#4a4a4a"
 
-        # set background of the Toplevel to the panel color so non-ttk areas match the theme
         try:
             date_win.configure(bg=panel_bg)
         except Exception:
             pass
 
-        # Use a themed container so ttk widgets inherit the correct look and spacing
         container = ttk.Frame(date_win, style="Panel.TFrame", padding=12)
         container.grid(row=0, column=0, sticky="nsew")
         date_win.grid_rowconfigure(0, weight=1)
@@ -983,7 +949,6 @@ class TodoApp:
         date_win.grab_set()
         self._center_popup(date_win, width=300, height=240, parent=parent_win)
 
-        # theme-aware panel colors
         panel_bg = self.style.lookup("Panel.TFrame", "background") or ("#ffffff" if self.current_theme == "light" else "#2d2d30")
         fg = self.style.lookup("Modern.TLabel", "foreground") or ("#000000" if self.current_theme == "light" else "#ffffff")
 
@@ -1059,16 +1024,15 @@ class TodoApp:
         cont = ttk.Frame(dlg, style="Panel.TFrame", padding=(12, 10))
         cont.pack(fill="both", expand=True)
 
-        # Title + icon row
+        # Title and icon row
         try:
             header_font = self.style.lookup("Header.TLabel", "font") or ("Segoe UI Semibold", 12)
         except Exception:
             header_font = ("Segoe UI Semibold", 12)
-        # use tk.Label so we can force the background color to match the panel
         lbl = tk.Label(cont, text=title, bg=panel_bg, fg=fg, font=header_font, anchor="w")
         lbl.grid(row=0, column=0, sticky="w", padx=2, pady=(0,6), columnspan=2)
 
-        # Message (wrap)
+        # Message wrap
         msg = tk.Label(cont, text=message, bg=panel_bg, fg=fg, justify="left", wraplength=380)
         msg.grid(row=1, column=0, columnspan=2, sticky="w", padx=2, pady=(0,12))
 
@@ -1098,12 +1062,11 @@ class TodoApp:
             b_no.grid(row=2, column=1, sticky="w")
             b_yes.focus_set()
         else:
-            # single OK button
+            # OK button
             b_ok = ttk.Button(cont, text="OK", command=_on_ok, style="Modern.TButton")
             b_ok.grid(row=2, column=0, columnspan=2)
             b_ok.focus_set()
 
-        # Make sure controls are placed nicely
         cont.grid_columnconfigure(0, weight=1)
         cont.grid_columnconfigure(1, weight=0)
 
@@ -1124,13 +1087,9 @@ class TodoApp:
         return bool(self._themed_message(title, message, kind="ask", parent=parent))
 
 
-# small custom spinbox that uses two arrow buttons so arrow color can follow theme
+# small custom spinbox 
 class SpinboxWithButtons(tk.Frame):
     def __init__(self, parent, from_=0, to=100, width=8, initial=None, bg=None, fg=None, step=1, **kw):
-        # parent: parent widget
-        # from_, to: numeric bounds
-        # width: entry character width
-        # bg, fg: colors to use for entry and arrow buttons
         super().__init__(parent, bg=bg)
         self._from = from_
         self._to = to
@@ -1138,16 +1097,15 @@ class SpinboxWithButtons(tk.Frame):
         self._bg = bg or self.cget("bg")
         self._fg = fg or "#000000"
 
-        # entry (styled to match your panel)
+        # entry
         self.entry = tk.Entry(self, width=width, bd=0, relief="flat",
                               justify="center", bg=self._bg, fg=self._fg, insertbackground=self._fg)
         self.entry.pack(side="left", fill="x", expand=True)
 
-        # compact vertical button column
         btn_col = tk.Frame(self, bg=self._bg)
         btn_col.pack(side="right", fill="y")
 
-        # Up / Down buttons use unicode arrows so color follows fg
+        # Up / Down buttons unicode arrows
         self._btn_up = tk.Button(btn_col, text="▲", bd=0, relief="flat",
                                  bg=self._bg, fg=self._fg, activebackground=self._bg,
                                  command=self._on_up)
@@ -1189,7 +1147,7 @@ class SpinboxWithButtons(tk.Frame):
         self.entry.delete(0, tk.END)
         self.entry.insert(0, str(val))
 
-    # allow updating colors when theme changes
+    # allow updating colors
     def configure_colors(self, bg, fg):
         self._bg = bg
         self._fg = fg
