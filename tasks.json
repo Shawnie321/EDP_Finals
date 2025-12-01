@@ -1,92 +1,92 @@
 [
   {
-    "id": 24,
-    "title": "App dev",
-    "due_date": "2025-12-13",
+    "id": 47,
+    "title": "App Dev Homework",
+    "due_date": "2025-11-29",
     "priority": "Normal",
     "status": "Completed",
     "created_at": null,
     "updated_at": null
   },
   {
-    "id": 25,
-    "title": "linis ako bahay",
-    "due_date": "2025-11-18",
+    "id": 48,
+    "title": "Soft Dev Project",
+    "due_date": "2025-12-03",
     "priority": "High",
     "status": "Pending",
     "created_at": null,
     "updated_at": null
   },
   {
-    "id": 26,
-    "title": "kumain ng sisig ni tatay",
+    "id": 49,
+    "title": "RRL",
+    "due_date": "2025-11-29",
+    "priority": "Normal",
+    "status": "Pending",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 50,
+    "title": "P.E. Dance",
+    "due_date": "2026-01-01",
+    "priority": "Normal",
+    "status": "Pending",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 51,
+    "title": "Game Dev Tabletop",
+    "due_date": "2025-12-25",
+    "priority": "High",
+    "status": "Pending",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 52,
+    "title": "Event Driven Project",
+    "due_date": "2025-12-04",
+    "priority": "High",
+    "status": "Completed",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 53,
+    "title": "Clean my room",
+    "due_date": "2025-11-25",
+    "priority": "Low",
+    "status": "Completed",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 55,
+    "title": "Go to dentist",
+    "due_date": "2025-12-03",
+    "priority": "Normal",
+    "status": "Pending",
+    "created_at": null,
+    "updated_at": null
+  },
+  {
+    "id": 56,
+    "title": "Go to grocery",
     "due_date": "2025-11-15",
-    "priority": "Normal",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 29,
-    "title": "mag jakol",
-    "due_date": "2025-11-27",
-    "priority": "Normal",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 34,
-    "title": "maglaba",
-    "due_date": "2025-11-28",
-    "priority": "High",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 35,
-    "title": "jhgjh",
-    "due_date": "2025-11-28",
-    "priority": "Normal",
-    "status": "Pending",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 36,
-    "title": "zxc",
-    "due_date": "2025-11-28",
-    "priority": "Normal",
-    "status": "Completed",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 40,
-    "title": "tae",
-    "due_date": "2024-10-10",
-    "priority": "Normal",
-    "status": "Pending",
-    "created_at": null,
-    "updated_at": null
-  },
-  {
-    "id": 41,
-    "title": "magchaos clash",
-    "due_date": "2025-11-30",
     "priority": "High",
     "status": "Pending",
     "created_at": null,
     "updated_at": null
   },
   {
-    "id": 43,
-    "title": "mag charge",
-    "due_date": "2025-11-30",
+    "id": 58,
+    "title": "System Testing 2",
+    "due_date": "2025-12-02",
     "priority": "Normal",
     "status": "Pending",
     "created_at": null,
-    "updated_at": "2025-11-30T12:53:20Z"
+    "updated_at": "2025-12-01T07:39:30Z"
   }
 ]
